@@ -24,11 +24,12 @@
  * J1, pin 18 : TxD
  */
 /*Master related*/
-#define TRANSFER_SIZE     32U    		/*! Transfer dataSize */
-#define TRANSFER_BAUDRATE 50000000U 	/*! Transfer baudrate: 50 MHz (and any larger) results in 46.887 MHz */
+////#define WORD_SIZE_32				/* 8bit or 32bit transfer - no difference in waveform: not 32 clocks, still 8 */
+#define TRANSFER_SIZE     (8U*4U)    	/*! Transfer dataSize : here multiples of four */
+#define TRANSFER_BAUDRATE 30000000U 	/*! Transfer baudrate: 30 MHz is the max., faster is wrong waveform! */
 /* it works also for the SPI slave!
  * It depends on the "clock_config.c": CLOCK_Root_Flexio2
- * if you change to other PLL: I could get: 257.865 MHz! but the setting is not 1:1 anymore for baudrate!
+ * if you change to 125 MHz (FLEXIO2 uses 120 MHz as max. possible - it results in 60 MHz but not clean waveform!
  */
 
 #define MASTER_FLEXIO_SPI_BASEADDR (FLEXIO2)
@@ -159,6 +160,11 @@ int main(void)
     /* Master config */
     FLEXIO_SPI_MasterGetDefaultConfig(&masterConfig);
     masterConfig.baudRate_Bps = TRANSFER_BAUDRATE;
+#ifdef WORD_SIZE_32
+    masterConfig.dataMode = kFLEXIO_SPI_32BitMode;
+#else
+    masterConfig.dataMode = kFLEXIO_SPI_8BitMode;
+#endif
 
     spiDev.flexioBase      = MASTER_FLEXIO_SPI_BASEADDR;
     spiDev.SDOPinIndex     = FLEXIO_SPI_SOUT_PIN;
@@ -173,7 +179,11 @@ int main(void)
     FLEXIO_SPI_MasterInit(&spiDev, &masterConfig, MASTER_FLEXIO_SPI_CLOCK_FREQUENCY);
 
     /*Slave config*/
+#ifdef WORD_SIZE_32
+    slaveConfig.bitsPerFrame = 32;
+#else
     slaveConfig.bitsPerFrame = 8;
+#endif
     slaveConfig.cpol         = kLPSPI_ClockPolarityActiveHigh;
     slaveConfig.cpha         = kLPSPI_ClockPhaseFirstEdge;
     slaveConfig.direction    = kLPSPI_MsbFirst;
@@ -237,7 +247,7 @@ int main(void)
     masterXfer.txData   = masterTxData;
     masterXfer.rxData   = masterRxData;
     masterXfer.dataSize = TRANSFER_SIZE;
-    masterXfer.flags    = kFLEXIO_SPI_8bitMsb;
+    masterXfer.flags    = kFLEXIO_SPI_csContinuous;		//kFLEXIO_SPI_8bitMsb;
 
     isMasterTransferCompleted = false;
     FLEXIO_SPI_MasterTransferEDMA(&spiDev, &g_m_handle, &masterXfer);

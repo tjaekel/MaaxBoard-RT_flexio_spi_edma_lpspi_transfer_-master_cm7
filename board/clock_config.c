@@ -509,11 +509,11 @@ void BOARD_BootClockRUN(void)
     CLOCK_SetRootClock(kCLOCK_Root_Flexio1, &rootCfg);
 
     /* Configure FLEXIO2 using OSC_RC_48M_DIV2 */
-    rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;			/* max. SPI clock is 46.887 MHz */
-    /* make the FLEXIO2 faster: results in 257.865 MHz! */
-    ////rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxSysPll2Out;
-    ////rootCfg.div = 4;
+    ////rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc48MDiv2;
+    ////rootCfg.div = 1;			/* max. possible SPI clock is 12 MHz */
+    /* make the FLEXIO2 faster: 120 MHz is max. PLL3 = 480 MHz, DIV2 = 240, div 2 = 120 */
+    rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxSysPll3Div2;
+    rootCfg.div = 2;				/* 120 MHz, max. SPI clock: 60 MHz, but works only up to 30 MHz */
     CLOCK_SetRootClock(kCLOCK_Root_Flexio2, &rootCfg);
 
     /* Configure GPT1 using OSC_RC_48M_DIV2 */
@@ -1327,6 +1327,8 @@ void BOARD_BootClockRUN_800M(void)
     /* Configure FLEXIO2 using OSC_RC_48M_DIV2 */
     rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc48MDiv2;
     rootCfg.div = 1;
+    ////rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxSysPll3Div2;
+    ////rootCfg.div = 2;
     CLOCK_SetRootClock(kCLOCK_Root_Flexio2, &rootCfg);
 
     /* Configure GPT1 using OSC_RC_48M_DIV2 */

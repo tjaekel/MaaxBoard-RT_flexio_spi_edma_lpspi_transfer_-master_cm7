@@ -21,17 +21,21 @@ Connect the SPI Master (FLEXIO) to the SPI Slave (LPSPI2):
  * J1, pin 32 - J1, pin 29 = MISO - MISO
 
 ## Max. Speed
-Depending on the clock configuration (in file "clock_config.c") I could get 258 MHz working - impressive (with short wires to connect).
-
-With unchanged clock config, the max. speed is 47 MHz.
+Depending on the clock configuration (in file "clock_config.c") I could get 66 MHz working - but waveform is wrong!
+The max. SPI speed SCLK is: 30 MHz (waveform OK).
 
 ```
     /* Configure FLEXIO2 using OSC_RC_48M_DIV2 */
     rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc48MDiv2;
     rootCfg.div = 1;			/* max. SPI clock is 46.887 MHz */
-    /* make the FLEXIO2 faster: results in 257.865 MHz! */
+    /* make the FLEXIO2 faster: 528 MHz div 4 = 132 MHz (135 MHz is max. LPSPIx_CLK_ROOT) */
     ////rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxSysPll2Out;
     ////rootCfg.div = 4;
     CLOCK_SetRootClock(kCLOCK_Root_Flexio2, &rootCfg);
 ```
+
+## Conclusion
+The max. SPI SCLK speed with FLEXIO is: 30 MHz.
+With regular LPSPIx SCLK can be:        45 MHz.
+(anything faster, next and fastest as 66 MHz - has "ugly" waveform)
 

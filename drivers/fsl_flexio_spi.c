@@ -312,7 +312,8 @@ void FLEXIO_SPI_MasterInit(FLEXIO_SPI_Type *base, flexio_spi_master_config_t *ma
     timerConfig.timerStart      = kFLEXIO_TimerStartBitEnabled;
     /* Low 8-bits are used to configure baudrate. */
     timerDiv = (uint16_t)(srcClock_Hz / masterConfig->baudRate_Bps);
-    timerDiv = timerDiv / 2U - 1U;
+    if (timerDiv > 1)
+    	timerDiv = timerDiv / 2U - 1U;
     /* High 8-bits are used to configure shift clock edges(transfer width). */
     timerCmp = ((uint16_t)masterConfig->dataMode * 2U - 1U) << 8U;
     timerCmp |= timerDiv;
